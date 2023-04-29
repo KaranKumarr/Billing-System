@@ -34,7 +34,7 @@
    msg_arinac db 10,13, 'How many arinac do you want to buy$'
    msg_sinopharm db 10,13, 'How many Sinopharm Vaccine do you want to buy$'
    msg_pfizer db 10,13, 'How many Pfizer Vaccine do you want to buy$'
-   total_msg dw 'Total Earned= $'
+   total_msg db 'Total Earned= $'
    price_panadol dw 4
    price_paracetamol dw 3
    price_cleritek dw 2    
@@ -65,14 +65,12 @@
    aspirin_print db 10,13, 'Aspirin sold = $'
    brufen_print db 10,13, 'Brufen sold = $'
    cleritek_print db 10,13, 'Cleritek sold = $'
-   paracetamol_print db 10,13, 'Paracetamol sold = $'
-    
+   paracetamol_print db 10,13, 'Paracetamol sold = $'    
             
 .code
 
 main proc
-        
-        
+           
     mov ax,@data
     mov ds,ax
 
@@ -85,19 +83,38 @@ main proc
     mov bx,offset password
     mov cx,6
     
-    l1:
+ l1:
     mov ah,1
     int 21h
     cmp al,[bx]
     jne incorrect
     inc bx
-    loop l1
+   loop l1
     
-    start:
+    cmp al,'1'
+     je menu2  
+    cmp al,'2'
+     je medicines_stats
+    cmp al,'3'
+     je show_amount
+    cmp al,'4'
+     je exit
+    
+    mov dx,offset wrong_input
+    mov ah,9
+    int 21h
+    
+    mov dx,offset input_again
+    mov ah,9
+    int 21h    
+    jmp start
+    
+    
+start:
     mov dx,offset newLine
     mov ah,9
     int 21h
-    call menu
+   call menu
 
     mov dx,offset newLine
     mov ah,9
@@ -105,391 +122,27 @@ main proc
     
     mov ah,1
     int 21h
-    
-    cmp al,'1'
-    je menu2  
-    cmp al,'2'
-    je medicines_stats
-    cmp al,'3'
-    je show_amount
-    cmp al,'4'
-    je exit
-    
-    mov dx,offset wrong_input
-    mov ah,9
-    int 21h
-    mov dx,offset input_again
-    mov ah,9
-    int 21h    
-    jmp start
-     
-     
-     
-    panadol:
-         
-        mov dx,offset msg_panadol
-        mov ah,9
-        int 21h
-            
-        mov dx,offset newLine
-        mov ah,9
-        int 21h        
-        
-        mov ah,1
-        int 21h
-        
-        sub al,48
-        
-        add panadol_sold,al
-        mul price_panadol
-        
-        add amount,al
-        mov cl,al
-        mov dx,offset newLine
-        mov ah,9
-        int 21h
-        mov dx,offset total_msg
-        mov ah,9
-        int 21h
-        mov dl,cl
-        add dl,48
-        mov ah,2
-        int 21h
-        
-         
-                
-        jmp start
-    
-    paracetamol:
-    
-        mov dx,offset msg_paracetamol
-        mov ah,9
-        int 21h
-            
-        mov dx,offset newLine
-        mov ah,9
-        int 21h        
-        
-        mov ah,1
-        int 21h
-        
-        sub al,48
-        
-        add paracetamol_sold,al
-        mul price_paracetamol
-        
-        add amount,al
-        mov cl,al
-        mov dx,offset newLine
-        mov ah,9
-        int 21h
-        mov dx,offset total_msg
-        mov ah,9
-        int 21h
-        mov dl,cl
-        add dl,48
-        mov ah,2
-        int 21h
-        
-        jmp start
-        
-                              
-    
-    cleritek:
-        
-        mov dx,offset msg_cleritek
-        mov ah,9
-        int 21h
-            
-        mov dx,offset newLine
-        mov ah,9
-        int 21h        
-        
-        mov ah,1
-        int 21h
-        
-        sub al,48
-        
-        add cleritek_sold,al
-        mul price_cleritek
-        
-        add amount,al
-        mov cl,al
-        mov dx,offset newLine
-        mov ah,9
-        int 21h
-        mov dx,offset total_msg
-        mov ah,9
-        int 21h
-        mov dl,cl
-        add dl,48
-        mov ah,2
-        int 21h
-        
-        jmp start
-        
-     aspirin:
-         
-        mov dx,offset msg_aspirin
-        mov ah,9
-        int 21h
-            
-        mov dx,offset newLine
-        mov ah,9
-        int 21h        
-        
-        mov ah,1
-        int 21h
-        
-        sub al,48
-        
-        add aspirin_sold,al
-        mul price_aspirin
-        
-        add amount,al
-        mov cl,al
-        mov dx,offset newLine
-        mov ah,9
-        int 21h
-        mov dx,offset total_msg
-        mov ah,9
-        int 21h
-        mov dl,cl
-        add dl,48
-        mov ah,2
-        int 21h
-        
-         
-                
-        jmp start
-           
-        brufen:
-         
-        mov dx,offset msg_brufen
-        mov ah,9
-        int 21h
-            
-        mov dx,offset newLine
-        mov ah,9
-        int 21h        
-        
-        mov ah,1
-        int 21h
-        
-        sub al,48
-        
-        add brufen_sold,al
-        mul price_brufen
-        
-        add amount,al
-        mov cl,al
-        mov dx,offset newLine
-        mov ah,9
-        int 21h
-        mov dx,offset total_msg
-        mov ah,9
-        int 21h
-        mov dl,cl
-        add dl,48
-        mov ah,2
-        int 21h
-        
-         
-                
-        jmp start
-        
-        surbex:
-         
-        mov dx,offset msg_surbex
-        mov ah,9
-        int 21h
-            
-        mov dx,offset newLine
-        mov ah,9
-        int 21h        
-        
-        mov ah,1
-        int 21h
-        
-        sub al,48
-        
-        add surbex_sold,al
-        mul price_surbex
-        
-        add amount,al
-        mov cl,al
-        mov dx,offset newLine
-        mov ah,9
-        int 21h
-        mov dx,offset total_msg
-        mov ah,9
-        int 21h
-        mov dl,cl
-        add dl,48
-        mov ah,2
-        int 21h
-        
-         
-                
-        jmp start
-     
-        arinac:
-         
-        mov dx,offset msg_arinac
-        mov ah,9
-        int 21h
-            
-        mov dx,offset newLine
-        mov ah,9
-        int 21h        
-        
-        mov ah,1
-        int 21h
-        
-        sub al,48
-        
-        add arinac_sold,al
-        mul price_arinac
-        
-        add amount,al
-        mov cl,al
-        mov dx,offset newLine
-        mov ah,9
-        int 21h
-        mov dx,offset total_msg
-        mov ah,9
-        int 21h
-        mov dl,cl
-        add dl,48
-        mov ah,2
-        int 21h
-                
-        jmp start
-        
-        sinopharm:
-         
-        mov dx,offset msg_sinopharm
-        mov ah,9
-        int 21h
-            
-        mov dx,offset newLine
-        mov ah,9
-        int 21h        
-        
-        mov ah,1
-        int 21h
-        
-        sub al,48
-        
-        add sinopharm_sold,al
-        mul price_sinopharm
-        
-        add amount,al
-        mov cl,al
-        mov dx,offset newLine
-        mov ah,9
-        int 21h
-        mov dx,offset total_msg
-        mov ah,9
-        int 21h
-        mov dl,cl
-        add dl,48
-        mov ah,2
-        int 21h
-                
-        jmp start
-     
-        pfizer:
-         
-        mov dx,offset msg_pfizer
-        mov ah,9
-        int 21h
-            
-        mov dx,offset newLine
-        mov ah,9
-        int 21h        
-        
-        mov ah,1
-        int 21h
-        
-        sub al,48
-        
-        add pfizer_sold,al
-        mul price_pfizer
-        
-        add amount,al
-        mov cl,al
-        mov dx,offset newLine
-        mov ah,9
-        int 21h
-        mov dx,offset total_msg
-        mov ah,9
-        int 21h
-        mov dl,cl
-        add dl,48
-        mov ah,2
-        int 21h
-                
-        jmp start
-     
+ 
         show_amount: 
         
-        mov dx,offset amount_earned
-        mov ah,9
+        mov dx, offset amount_earned
+        mov ah, 9
         int 21h
         
         mov dl,amount
         add dl,48
         mov ah,2
         int 21h
-        
+  
         jmp start   
-        
-        incorrect:
-        
+    
+  incorrect:
         mov dx,offset incorrect_password
         mov ah,9
         int 21h
-        jmp exit
-        
-        exit:
-        mov ah,4ch
-        int 21h
-            
-main endp
-    
-    menu proc
-      
-        mov dx,offset welcome
-        mov ah,9
-        int 21h
-        
-        mov dx,offset msg1
-        mov ah,9
-        int 21h
-        
-        mov dx,offset msg_medicines
-        mov ah,9
-        int 21h
-        
-        mov dx,offset medicines_sold
-        mov ah,9
-        int 21h
-        
-        mov dx,offset amount_print
-        mov ah,9
-        int 21h
-        
-        mov dx,offset exit_program
-        mov ah,9
-        int 21h                   
-        
-             
-        ret
-          
-    menu endp
-    
-    menu2 proc  
+       jmp exit
+
+menu2 proc  
         
         mov dx,offset msg2
         mov ah,9
@@ -539,7 +192,7 @@ main endp
         int 21h
         
         cmp al,'1'
-        je panadol  
+        je panadol 
         cmp al,'2'
         je paracetamol
         cmp al,'3'
@@ -558,10 +211,355 @@ main endp
         je pfizer
         
         ret
+
+   panadol:
+         
+        mov dx,offset msg_panadol
+        mov ah,9
+        int 21h
             
+        mov dx,offset newLine
+        mov ah,9
+        int 21h        
+        
+        mov ah,1
+        int 21h
+        
+        sub al,48
+        
+        add panadol_sold,al
+        mul price_panadol
+        
+        add amount,al
+        mov cl,al
+        mov dx,offset newLine
+        mov ah,9
+        int 21h
+        mov dx,offset total_msg
+        mov ah,9
+        int 21h
+        mov dl,cl
+        add dl,48
+        mov ah,2
+        int 21h     
+                
+        jmp start
+
+   paracetamol:
+    
+        mov dx,offset msg_paracetamol
+        mov ah,9
+        int 21h
             
-    menu2 endp
+        mov dx,offset newLine
+        mov ah,9
+        int 21h        
+        
+        mov ah,1
+        int 21h
+        
+        sub al,48
+        
+        add paracetamol_sold,al
+        mul price_paracetamol
+        
+        add amount,al
+        mov cl,al
+        mov dx,offset newLine
+        mov ah,9
+        int 21h
+        mov dx,offset total_msg
+        mov ah,9
+        int 21h
+        mov dl,cl
+        add dl,48
+        mov ah,2
+        int 21h
+        
+        jmp start                  
+    
+   cleritek:
+        
+        mov dx,offset msg_cleritek
+        mov ah,9
+        int 21h
+            
+        mov dx,offset newLine
+        mov ah,9
+        int 21h        
+        
+        mov ah,1
+        int 21h
+        
+        sub al,48
+        
+        add cleritek_sold,al
+        mul price_cleritek
+        
+        add amount,al
+        mov cl,al
+        mov dx,offset newLine
+        mov ah,9
+        int 21h
+        mov dx,offset total_msg
+        mov ah,9
+        int 21h
+        mov dl,cl
+        add dl,48
+        mov ah,2
+        int 21h
+        
+        jmp start
+        
+   aspirin:
+         
+        mov dx,offset msg_aspirin
+        mov ah,9
+        int 21h
+            
+        mov dx,offset newLine
+        mov ah,9
+        int 21h        
+        
+        mov ah,1
+        int 21h
+        
+        sub al,48
+        
+        add aspirin_sold,al
+        mul price_aspirin
+        
+        add amount,al
+        mov cl,al
+        mov dx,offset newLine
+        mov ah,9
+        int 21h
+        mov dx,offset total_msg
+        mov ah,9
+        int 21h
+        mov dl,cl
+        add dl,48
+        mov ah,2
+        int 21h
+                
+        jmp start
+           
+   brufen:
+         
+        mov dx,offset msg_brufen
+        mov ah,9
+        int 21h
+            
+        mov dx,offset newLine
+        mov ah,9
+        int 21h        
+        
+        mov ah,1
+        int 21h
+        
+        sub al,48
+        
+        add brufen_sold,al
+        mul price_brufen
+        
+        add amount,al
+        mov cl,al
+        mov dx,offset newLine
+        mov ah,9
+        int 21h
+        mov dx,offset total_msg
+        mov ah,9
+        int 21h
+        mov dl,cl
+        add dl,48
+        mov ah,2
+        int 21h   
+                
+        jmp start
+        
+   surbex:
+         
+        mov dx,offset msg_surbex
+        mov ah,9
+        int 21h
+            
+        mov dx,offset newLine
+        mov ah,9
+        int 21h        
+        
+        mov ah,1
+        int 21h
+        
+        sub al,48
+        
+        add surbex_sold,al
+        mul price_surbex
+        
+        add amount,al
+        mov cl,al
+        mov dx,offset newLine
+        mov ah,9
+        int 21h
+        mov dx,offset total_msg
+        mov ah,9
+        int 21h
+        mov dl,cl
+        add dl,48
+        mov ah,2
+        int 21h                
+                
+        jmp start
      
+    arinac:
+         
+        mov dx,offset msg_arinac
+        mov ah,9
+        int 21h
+            
+        mov dx,offset newLine
+        mov ah,9
+        int 21h        
+        
+        mov ah,1
+        int 21h
+        
+        sub al,48
+        
+        add arinac_sold,al
+        mul price_arinac
+        
+        add amount,al
+        mov cl,al
+        mov dx,offset newLine
+        mov ah,9
+        int 21h
+        mov dx,offset total_msg
+        mov ah,9
+        int 21h
+        mov dl,cl
+        add dl,48
+        mov ah,2
+        int 21h
+                
+        jmp start
+        
+    sinopharm:
+         
+        mov dx,offset msg_sinopharm
+        mov ah,9
+        int 21h
+            
+        mov dx,offset newLine
+        mov ah,9
+        int 21h        
+        
+        mov ah,1
+        int 21h
+        
+        sub al,48
+        
+        add sinopharm_sold,al
+        mul price_sinopharm
+        
+        add amount,al
+        mov cl,al
+        mov dx,offset newLine
+        mov ah,9
+        int 21h
+        mov dx,offset total_msg
+        mov ah,9
+        int 21h
+        mov dl,cl
+        add dl,48
+        mov ah,2
+        int 21h
+                
+        jmp start
+     
+    pfizer:
+         
+        mov dx,offset msg_pfizer
+        mov ah,9
+        int 21h
+            
+        mov dx,offset newLine
+        mov ah,9
+        int 21h        
+        
+        mov ah,1
+        int 21h
+        
+        sub al,48
+        
+        add pfizer_sold,al
+        mul price_pfizer
+        
+        add amount,al
+        mov cl,al
+        mov dx,offset newLine
+        mov ah,9
+        int 21h
+        mov dx,offset total_msg
+        mov ah,9
+        int 21h
+        mov dl,cl
+        add dl,48
+        mov ah,2
+        int 21h
+                
+        jmp start
+
+    start:
+        mov dx,offset newLine
+        mov ah,9
+        int 21h
+       call menu
+
+        mov dx,offset newLine
+        mov ah,9
+        int 21h    
+    
+        mov ah,1
+        int 21h       
+            
+menu2 endp
+        
+   exit:
+        mov ah,4ch
+        int 21h
+            
+main endp
+    
+    menu proc
+      
+        mov dx,offset welcome
+        mov ah,9
+        int 21h
+        
+        mov dx,offset msg1
+        mov ah,9
+        int 21h
+        
+        mov dx,offset msg_medicines
+        mov ah,9
+        int 21h
+        
+        mov dx,offset medicines_sold
+        mov ah,9
+        int 21h
+        
+        mov dx,offset amount_print
+        mov ah,9
+        int 21h
+        
+        mov dx,offset exit_program
+        mov ah,9
+        int 21h                   
+               
+      ret
+          
+    menu endp
+      
     medicines_stats proc
           
         mov dx,offset panadol_print
@@ -644,11 +642,10 @@ main endp
         
         mov dl,sinopharm_sold
         mov ah,2
-        int 21h
+        int 21h  
         
+      ret 
         
-        ret 
-          
     medicines_stats endp     
         
 end main
