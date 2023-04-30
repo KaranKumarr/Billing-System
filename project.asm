@@ -5,16 +5,18 @@
 .data
    
    input_password db 'Please Enter Your Password$'
+   key_message db 'Press any key to continue... $'
    password db 'qwerty$'
    incorrect_password db 10,13, 'Incorrect Password$'    
    welcome db 10,13,10,13, 'WELCOME TO MEDICAL STORE$'
-   msg1 db 10,13,10,13, 'Choose a Option$'
+   msg1 db 10,13,10,13, 'Choose a Option: $'
    msg2 db 10,13,10,13, 'What Do You Want To Buy$'
    msg_medicines db 10,13, 'Press 1 to buy medicines$'
    medicines_sold db 10,13, 'Press 2 to see medicines statistics$'
    input_again db 10,13, 'Please Press one of the above given keys$'
    wrong_input db 10,13, 'Wrong Input$'
    exit_program db 10,13,'Press 4 to exit$'
+   
    opt1 db 10,13, '1. Panadol - 4rs$'
    opt2 db 10,13, '2. Paracetamol - 3rs$'
    opt3 db 10,13, '3. Cleritek - 2rs$'
@@ -24,7 +26,9 @@
    opt7 db 10,13, '7. Arinac - 4rs$'
    opt8 db 10,13, '8. Sinopharm Vaccine - 2rs$'
    opt9 db 10,13, '9. Pfizer Vaccine - 8rs$'
+   
    newLine db 10,13, '$'     
+   
    msg_panadol db 10,13, 'How many panadols do you want to buy$'
    msg_paracetamol db 10,13, 'How many paracetamol do you want to buy$'
    msg_cleritek db 10,13, 'How many cleritek do you want to buy$'
@@ -35,6 +39,7 @@
    msg_sinopharm db 10,13, 'How many Sinopharm Vaccine do you want to buy$'
    msg_pfizer db 10,13, 'How many Pfizer Vaccine do you want to buy$'
    total_msg db 'Total Earned= $'
+   
    price_panadol dw 4
    price_paracetamol dw 3
    price_cleritek dw 2    
@@ -43,9 +48,11 @@
    price_surbex dw 5    
    price_arinac dw 4
    price_sinopharm dw 2
-   price_pfizer dw 8    
+   price_pfizer dw 8
+   
    amount_earned db 10,13,'Amount earned= $'
    amount db 0
+   
    amount_print db 10,13,'Press 3 to show amount earned today$'
    panadol_sold db 0
    paracetamol_sold db 0
@@ -65,7 +72,9 @@
    aspirin_print db 10,13, 'Aspirin sold = $'
    brufen_print db 10,13, 'Brufen sold = $'
    cleritek_print db 10,13, 'Cleritek sold = $'
-   paracetamol_print db 10,13, 'Paracetamol sold = $'    
+   paracetamol_print db 10,13, 'Paracetamol sold = $'  
+   
+   tryagain db "Try Again? (1/0): $"
             
 .code
 
@@ -73,74 +82,155 @@ main proc
            
     mov ax,@data
     mov ds,ax
+    
+    mov bx, offset menu
 
-    mov dx,offset input_password
-    mov ah,9
-    int 21h
+password_label:
+
+    ; printing the new line
     mov dx,offset newLine
     mov ah,9
     int 21h
-    mov bx,offset password
-    mov cx,6
+
+
+    ; printing the input_password string
+    mov dx, offset input_password
+    mov ah,9
+    int 21h
     
+    ; printing the new line
+    mov dx,offset newLine
+    mov ah,9
+    int 21h
+    
+    mov si, 0
+    mov cx,6
+ 
+; loop to input password  
  l1:
     mov ah,1
     int 21h
-    cmp al,[bx]
+    cmp al,password[si]
     jne incorrect
-    inc bx
-   loop l1
+    inc si
+    loop l1
+   
+    ; printing the new line
+    mov dx,offset newLine
+    mov ah,9
+    int 21h
+   
+    ; press any key to continue
+    mov ah, 9
+    mov dx, offset key_message
+    int 21h
+   
+    mov ah, 1
+    int 21h
+   
+    mov dx, offset welcome
+    mov ah, 9
+    int 21h
+   
+; menu procedure
+menu:
+        
+    mov dx, offset msg1
+    mov ah, 9
+    int 21h
+        
+    mov dx, offset msg_medicines
+    mov ah, 9
+    int 21h
+        
+    mov dx, offset medicines_sold
+    mov ah, 9
+    int 21h
+        
+    mov dx, offset amount_print
+    mov ah,9
+    int 21h
+        
+    mov dx, offset exit_program
+    mov ah,9
+    int 21h
+        
+    mov ah, 9
+    mov dx, offset msg1
+    int 21h
+    
+    mov ah, 1
+    int 21h
     
     cmp al,'1'
-     je menu2  
-    cmp al,'2'
-     je medicines_stats
-    cmp al,'3'
+     je menu2
+     
+     cmp al,'3'
      je show_amount
+     
     cmp al,'4'
      je exit
+     
+    cmp al,'2'
+     call medicines_stats
+     
+    cmp al, '2'
+     jmp start
     
-    mov dx,offset wrong_input
+    ; storing the offset address of menu in bx register 
+    ;mov bx, offset menu
+    
+    mov dx, offset wrong_input
     mov ah,9
     int 21h
     
-    mov dx,offset input_again
-    mov ah,9
-    int 21h    
+    mov dx, offset input_again
+    mov ah, 9
+    int 21h
+    
     jmp start
     
-    
 start:
-    mov dx,offset newLine
+    mov dx, offset newLine
     mov ah,9
     int 21h
-   call menu
-
-    mov dx,offset newLine
-    mov ah,9
-    int 21h    
     
-    mov ah,1
-    int 21h
+    jmp menu
  
-        show_amount: 
+show_amount:
+    mov dx, offset amount_earned
+    mov ah, 9
+    int 21h
         
-        mov dx, offset amount_earned
-        mov ah, 9
-        int 21h
-        
-        mov dl,amount
-        add dl,48
-        mov ah,2
-        int 21h
+    mov dl, amount
+    add dl, 30h
+    mov ah, 0
+    mov ah, 2
+    int 21h
   
-        jmp start   
+    jmp start   
     
-  incorrect:
-        mov dx,offset incorrect_password
-        mov ah,9
-        int 21h
-       jmp exit
+incorrect:
+    mov dx,offset incorrect_password
+    mov ah,9
+    int 21h
+    
+    mov dx, offset newLine
+    mov ah, 09h
+    int 21h
+    
+    mov dx, offset tryagain
+    mov ah, 09h
+    int 21h
+    
+    mov ah, 1
+    int 21h
+    
+    cmp al, '1'
+    je password_label
+    
+    jmp exit
+    
 
 menu2 proc  
         
@@ -209,10 +299,9 @@ menu2 proc
         je sinopharm
         cmp al,'9'
         je pfizer
-        
-        ret
+    
 
-   panadol:
+panadol:
          
         mov dx,offset msg_panadol
         mov ah,9
@@ -232,20 +321,24 @@ menu2 proc
         
         add amount,al
         mov cl,al
+        
         mov dx,offset newLine
         mov ah,9
         int 21h
+        
         mov dx,offset total_msg
         mov ah,9
         int 21h
+        
         mov dl,cl
-        add dl,48
+        add dl,30h
+        
         mov ah,2
         int 21h     
                 
         jmp start
 
-   paracetamol:
+paracetamol:
     
         mov dx,offset msg_paracetamol
         mov ah,9
@@ -278,7 +371,7 @@ menu2 proc
         
         jmp start                  
     
-   cleritek:
+cleritek:
         
         mov dx,offset msg_cleritek
         mov ah,9
@@ -311,7 +404,7 @@ menu2 proc
         
         jmp start
         
-   aspirin:
+aspirin:
          
         mov dx,offset msg_aspirin
         mov ah,9
@@ -344,7 +437,7 @@ menu2 proc
                 
         jmp start
            
-   brufen:
+brufen:
          
         mov dx,offset msg_brufen
         mov ah,9
@@ -377,7 +470,7 @@ menu2 proc
                 
         jmp start
         
-   surbex:
+surbex:
          
         mov dx,offset msg_surbex
         mov ah,9
@@ -410,7 +503,7 @@ menu2 proc
                 
         jmp start
      
-    arinac:
+arinac:
          
         mov dx,offset msg_arinac
         mov ah,9
@@ -443,7 +536,7 @@ menu2 proc
                 
         jmp start
         
-    sinopharm:
+sinopharm:
          
         mov dx,offset msg_sinopharm
         mov ah,9
@@ -476,8 +569,8 @@ menu2 proc
                 
         jmp start
      
-    pfizer:
-         
+pfizer:
+ 
         mov dx,offset msg_pfizer
         mov ah,9
         int 21h
@@ -486,166 +579,152 @@ menu2 proc
         mov ah,9
         int 21h        
         
-        mov ah,1
+        mov ah, 1
         int 21h
         
-        sub al,48
+        sub al, 48
         
-        add pfizer_sold,al
+        add pfizer_sold, al
         mul price_pfizer
         
-        add amount,al
-        mov cl,al
-        mov dx,offset newLine
-        mov ah,9
+        add amount, al
+        mov cl, al
+        
+        mov dx, offset newLine
+        mov ah, 9
         int 21h
-        mov dx,offset total_msg
-        mov ah,9
+        
+        mov dx, offset total_msg
+        mov ah, 9
         int 21h
-        mov dl,cl
-        add dl,48
-        mov ah,2
+        
+        mov dl, cl
+        add dl, 48
+        mov ah, 2
         int 21h
                 
         jmp start
 
-    start:
-        mov dx,offset newLine
-        mov ah,9
-        int 21h
-       call menu
-
-        mov dx,offset newLine
-        mov ah,9
-        int 21h    
+start:
+    mov dx,offset newLine
+    mov ah,9
+    int 21h
     
-        mov ah,1
-        int 21h       
+    ; bx has offset menu
+    jmp bx
             
 menu2 endp
         
-   exit:
-        mov ah,4ch
-        int 21h
+exit:
+    mov ah,4ch
+    int 21h
+        
+    ret
             
 main endp
     
-    menu proc
-      
-        mov dx,offset welcome
-        mov ah,9
-        int 21h
-        
-        mov dx,offset msg1
-        mov ah,9
-        int 21h
-        
-        mov dx,offset msg_medicines
-        mov ah,9
-        int 21h
-        
-        mov dx,offset medicines_sold
-        mov ah,9
-        int 21h
-        
-        mov dx,offset amount_print
-        mov ah,9
-        int 21h
-        
-        mov dx,offset exit_program
-        mov ah,9
-        int 21h                   
-               
-      ret
+medicines_stats proc
           
-    menu endp
-      
-    medicines_stats proc
-          
-        mov dx,offset panadol_print
-        mov ah,9
-        int 21h
+    mov dx,offset panadol_print
+    mov ah,9
+    int 21h
         
-        add panadol_sold,48
+    add panadol_sold,48
         
-        mov dl,panadol_sold
-        mov ah,2
-        int 21h
+    mov dl,panadol_sold
+    mov ah,2
+    int 21h
         
-        mov dx,offset paracetamol_print
-        mov ah,9
-        int 21h
+    mov dx,offset paracetamol_print
+    mov ah,9
+    int 21h
         
-        add paracetamol_sold,48
+    add paracetamol_sold,48
         
-        mov dl,paracetamol_sold
-        mov ah,2
-        int 21h
+    mov dl,paracetamol_sold
+    mov ah,2
+    int 21h
+
+    mov dx,offset cleritek_print
+    mov ah,9
+    int 21h 
         
+    add cleritek_sold,48
         
-        mov dx,offset cleritek_print
-        mov ah,9
-        int 21h 
+    mov dl,cleritek_sold
+    mov ah,2
+    int 21h
         
-        add cleritek_sold,48
+    mov dx,offset aspirin_print
+    mov ah,9
+    int 21h
+    
+    add aspirin_sold,48
         
-        mov dl,cleritek_sold
-        mov ah,2
-        int 21h
+    mov dl,aspirin_sold
+    mov ah,2
+    int 21h
         
-        mov dx,offset aspirin_print
-        mov ah,9
-        int 21h
+    mov dx,offset brufen_print
+    mov ah,9
+    int 21h
         
-        add aspirin_sold,48
+    add brufen_sold,48
         
-        mov dl,aspirin_sold
-        mov ah,2
-        int 21h
+    mov dl,brufen_sold
+    mov ah,2
+    int 21h
         
+    mov dx,offset arinac_print
+    mov ah,9
+    int 21h
         
-        mov dx,offset brufen_print
-        mov ah,9
-        int 21h
+    add arinac_sold,48
         
-        add brufen_sold,48
+    mov dl,arinac_sold
+    mov ah,2
+    int 21h
         
-        mov dl,brufen_sold
-        mov ah,2
-        int 21h
+    mov dx,offset pfizer_print
+    mov ah,9
+    int 21h
         
-        mov dx,offset arinac_print
-        mov ah,9
-        int 21h
+    add pfizer_sold,48
         
-        add arinac_sold,48
+    mov dl,pfizer_sold
+    mov ah,2
+    int 21h
         
-        mov dl,arinac_sold
-        mov ah,2
-        int 21h
+    mov dx,offset sinopharm_print
+    mov ah,9
+    int 21h
         
-        mov dx,offset pfizer_print
-        mov ah,9
-        int 21h
+    add sinopharm_sold,48
         
-        add pfizer_sold,48
+    mov dl,sinopharm_sold
+    mov ah,2
+    int 21h
+    
+    mov ah, 09h
+    mov dx, offset newLine
+    int 21h
+    
+    mov ah, 09h
+    mov dx, offset key_message
+    int 21h
+    
+    mov ah, 01h
+    int 21h
+    
+    mov ah, 09h
+    mov dx, offset newLine
+    int 21h
+    
+    ; bx has offset menu
+    jmp bx
+
+    ret
         
-        mov dl,pfizer_sold
-        mov ah,2
-        int 21h
-        
-        mov dx,offset sinopharm_print
-        mov ah,9
-        int 21h
-        
-        add sinopharm_sold,48
-        
-        mov dl,sinopharm_sold
-        mov ah,2
-        int 21h  
-        
-      ret 
-        
-    medicines_stats endp     
-        
+medicines_stats endp
+
 end main
