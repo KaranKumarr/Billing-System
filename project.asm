@@ -1,12 +1,17 @@
-.model small
+;            -------------------------------------------
+;                    BILLING MANAGEMENT SYSTEM
+;            -------------------------------------------
 
+.model small
 .stack 100h
 
 .data
    
+   ; menu-related msgs
    input_password db 'Please Enter Your Password$'
+   tryagain db "Try Again? (1/0): $"
    key_message db 'Press any key to continue... $'
-   password db 'qwerty$'
+   password db 'coding$'
    incorrect_password db 10,13, 'Incorrect Password$'    
    welcome db 10,13,10,13, 'WELCOME TO MEDICAL STORE$'
    msg1 db 10,13,10,13, 'Choose a Option: $'
@@ -17,6 +22,7 @@
    wrong_input db 10,13, 'Wrong Input$'
    exit_program db 10,13,'Press 4 to exit$'
    
+   ; temp variables
    opt1 db 10,13, '1. Panadol - 4rs$'
    opt2 db 10,13, '2. Paracetamol - 3rs$'
    opt3 db 10,13, '3. Cleritek - 2rs$'
@@ -27,8 +33,10 @@
    opt8 db 10,13, '8. Sinopharm Vaccine - 2rs$'
    opt9 db 10,13, '9. Pfizer Vaccine - 8rs$'
    
+   ; newline
    newLine db 10,13, '$'     
    
+   ; medicine related msgs
    msg_panadol db 10,13, 'How many panadols do you want to buy$'
    msg_paracetamol db 10,13, 'How many paracetamol do you want to buy$'
    msg_cleritek db 10,13, 'How many cleritek do you want to buy$'
@@ -40,6 +48,7 @@
    msg_pfizer db 10,13, 'How many Pfizer Vaccine do you want to buy$'
    total_msg db 'Total Earned= $'
    
+   ; price related msgs
    price_panadol dw 4
    price_paracetamol dw 3
    price_cleritek dw 2    
@@ -50,9 +59,9 @@
    price_sinopharm dw 2
    price_pfizer dw 8
    
+   ; amount-related msgs
    amount_earned db 10,13,'Amount earned= $'
    amount db 0
-   
    amount_print db 10,13,'Press 3 to show amount earned today$'
    panadol_sold db 0
    paracetamol_sold db 0
@@ -64,6 +73,7 @@
    sinopharm_sold db 0
    pfizer_sold db 0
    
+   ; report(output) msgs
    panadol_print db 10,13, 'Panadols sold = $'
    pfizer_print db 10,13, 'Pfizer Vaccine sold = $'
    sinopharm_print db 10,13, 'Sinopharm Vaccine sold = $'
@@ -73,26 +83,27 @@
    brufen_print db 10,13, 'Brufen sold = $'
    cleritek_print db 10,13, 'Cleritek sold = $'
    paracetamol_print db 10,13, 'Paracetamol sold = $'  
-   
-   tryagain db "Try Again? (1/0): $"
             
 .code
 
 main proc
-           
+    
+    ; here we can access tha variables from data segment on heap       
     mov ax,@data
     mov ds,ax
     
+    ; moving the offset address of menu label into bx
+    ; as to perform unconditional jmp to this label through
+    ; procedures
     mov bx, offset menu
 
-password_label:
+password_label:                                    
 
     ; printing the new line
     mov dx,offset newLine
     mov ah,9
     int 21h
-
-
+    
     ; printing the input_password string
     mov dx, offset input_password
     mov ah,9
@@ -103,10 +114,10 @@ password_label:
     mov ah,9
     int 21h
     
-    mov si, 0
-    mov cx,6
+    mov si, 0   ; to traverse through password-array
+    mov cx,6    ; 6 = length of 'coding'
  
-; loop to input password  
+    ; loop to input password  
  l1:
     mov ah,1
     int 21h
@@ -124,7 +135,8 @@ password_label:
     mov ah, 9
     mov dx, offset key_message
     int 21h
-   
+    
+    ; getting the character to continue
     mov ah, 1
     int 21h
    
@@ -132,14 +144,16 @@ password_label:
     mov ah, 9
     int 21h
    
-; menu procedure
+    ; menu procedure
+    ; here we are showing menu to choose different options 
+    ; you can see menu in the data segment
 menu:
         
-    mov dx, offset msg1
+    mov dx, offset msg1                                
     mov ah, 9
     int 21h
         
-    mov dx, offset msg_medicines
+    mov dx, offset msg_medicines                        
     mov ah, 9
     int 21h
         
@@ -159,27 +173,31 @@ menu:
     mov dx, offset msg1
     int 21h
     
+    ; after displaying the menu, getting the input
+    ; from the user to continue
     mov ah, 1
     int 21h
     
+    ;here we compare the choosen value and move to the label according to choice
     cmp al,'1'
-     je menu2
+     je menu2   ; control transfered to "buying medicine"
      
-     cmp al,'3'
+    cmp al,'3'  ; control transfered to "show_amount label"
      je show_amount
      
-    cmp al,'4'
+    cmp al,'4'  ; exit BMS (billing Management System)
      je exit
      
-    cmp al,'2'
+    cmp al,'2'  ; control transfered to "Statistics of Medicines - Quantity"
      call medicines_stats
      
     cmp al, '2'
-     jmp start
+     jmp start1
     
-    ; storing the offset address of menu in bx register 
-    ;mov bx, offset menu
-    
+    ; if none of the cases matched, the obvious case
+    ; is that user had entered value other than menu
+    ; so displaying proper msg and shifting the control
+    ; to input_again label
     mov dx, offset wrong_input
     mov ah,9
     int 21h
@@ -188,15 +206,19 @@ menu:
     mov ah, 9
     int 21h
     
-    jmp start
+    jmp start1
     
-start:
+    ;this is the label of start1 from where it will move to menu again    
+start1: 
     mov dx, offset newLine
     mov ah,9
     int 21h
     
+    ; shifting the control to display the menu
     jmp menu
- 
+    
+    ; control shifted from line - 183
+    ;this label will show the amount earned by selling medicine
 show_amount:
     mov dx, offset amount_earned
     mov ah, 9
@@ -207,33 +229,49 @@ show_amount:
     mov ah, 0
     mov ah, 2
     int 21h
-  
-    jmp start   
     
+    ; shifting the control to start from where
+    ; new line will be printed and jump to menu label 
+    jmp start1   
+     
+     ; a special label for incorrect password-input
 incorrect:
-    mov dx,offset incorrect_password
-    mov ah,9
+
+    ; displaying a proper msg for incorrect password                                 
+    mov dx,offset incorrect_password       
+    mov ah,9                              
     int 21h
     
+    ; printing new line
     mov dx, offset newLine
     mov ah, 09h
     int 21h
     
+    ; asking the user whether to try again or
+    ; to exit the BILLING MANAGEMENT SYSTEM
     mov dx, offset tryagain
     mov ah, 09h
     int 21h
-    
+     
+    ; getting the user's choice
     mov ah, 1
     int 21h
     
+    ; 1 means yes and user will be prompted to password label
+    ; to re-enter password
     cmp al, '1'
     je password_label
     
+    ; if there is any other input than 1
+    ; then it is obvious to exit BMS (Billing Management System)
     jmp exit
     
-
-menu2 proc  
+    
+    ;this is the second menu procedure
+    ;in this procedure there is given a menu of different medicines to choose any
+menu2 proc 
         
+        ; displaying the medicine msgs in the menu
         mov dx,offset msg2
         mov ah,9
         int 21h
@@ -274,13 +312,18 @@ menu2 proc
         mov ah,9
         int 21h
         
+        ; new line
         mov dx,offset newLine
         mov ah,9
         int 21h    
         
+        ; after displaying the menu, the BMS will prompt
+        ; the user to enter his choice about medicine
         mov ah,1
         int 21h
         
+        ; after the choice is selected by the user it will
+        ; be compared one by one by cmp instruction
         cmp al,'1'
         je panadol 
         cmp al,'2'
@@ -300,7 +343,12 @@ menu2 proc
         cmp al,'9'
         je pfizer
     
-
+        ; from line 343 to 649
+        ; each label performs the following operations
+        ;   * Display a proper msgs of the respective medicine
+        ;   * input the # of medicine to buy
+        ;   * updating the medicine statistics
+        ;   * calculaing the total amount
 panadol:
          
         mov dx,offset msg_panadol
@@ -575,156 +623,155 @@ pfizer:
         mov ah,9
         int 21h
             
-        mov dx,offset newLine
+        mov dx,offset newLine       ;line feed
         mov ah,9
         int 21h        
         
-        mov ah, 1
+        mov ah, 1                   ;input from user
         int 21h
         
-        sub al, 48
+        sub al, 48                  ;convert data into numerical digit 
         
-        add pfizer_sold, al
+        add pfizer_sold, al         ;add input to already sold medicine
         mul price_pfizer
         
-        add amount, al
-        mov cl, al
+        add amount, al              ;add al to original total amount earned
+        mov cl, al                  ;save the amount
         
-        mov dx, offset newLine
+        mov dx, offset newLine      ;line feed
         mov ah, 9
         int 21h
         
-        mov dx, offset total_msg
+        mov dx, offset total_msg    ;display message (total amount)
         mov ah, 9
         int 21h
         
         mov dl, cl
-        add dl, 48
+        add dl, 48                  ;convert data into numerical digit 
         mov ah, 2
         int 21h
                 
         jmp start
 
 start:
-    mov dx,offset newLine
+    mov dx,offset newLine           ;line feed
     mov ah,9
     int 21h
     
-    ; bx has offset menu
-    jmp bx
+    jmp bx                          ;bx has offset menu
             
 menu2 endp
         
 exit:
-    mov ah,4ch
+    mov ah,4ch                      ;console return to dos
     int 21h
         
     ret
             
-main endp
+main endp                           ;main end
     
 medicines_stats proc
           
-    mov dx,offset panadol_print
+    mov dx,offset panadol_print     ;display line of medicine name
     mov ah,9
     int 21h
         
-    add panadol_sold,48
+    add panadol_sold,48             ;convert data into numerical digit
         
-    mov dl,panadol_sold
+    mov dl,panadol_sold             ;display count how much a specific medicine sold
     mov ah,2
     int 21h
         
-    mov dx,offset paracetamol_print
+    mov dx,offset paracetamol_print ;display line of medicine name
     mov ah,9
     int 21h
         
-    add paracetamol_sold,48
+    add paracetamol_sold,48         ;convert data into numerical digit
         
-    mov dl,paracetamol_sold
+    mov dl,paracetamol_sold         ;display count how much a specific medicine sold
     mov ah,2
     int 21h
 
-    mov dx,offset cleritek_print
+    mov dx,offset cleritek_print    ;display line of medicine name
     mov ah,9
     int 21h 
         
-    add cleritek_sold,48
+    add cleritek_sold,48            ;convert data into numerical digit
         
-    mov dl,cleritek_sold
+    mov dl,cleritek_sold            ;display count how much a specific medicine sold
     mov ah,2
     int 21h
         
-    mov dx,offset aspirin_print
+    mov dx,offset aspirin_print     ;display line of medicine name
     mov ah,9
     int 21h
     
-    add aspirin_sold,48
+    add aspirin_sold,48             ;convert data into numerical digit
         
-    mov dl,aspirin_sold
+    mov dl,aspirin_sold             ;display count how much a specific medicine sold
     mov ah,2
     int 21h
         
-    mov dx,offset brufen_print
+    mov dx,offset brufen_print      ;display line of medicine name
     mov ah,9
     int 21h
         
-    add brufen_sold,48
+    add brufen_sold,48              ;convert data into numerical digit
         
-    mov dl,brufen_sold
+    mov dl,brufen_sold              ;display count how much a specific medicine sold
     mov ah,2
     int 21h
         
-    mov dx,offset arinac_print
+    mov dx,offset arinac_print      ;display line of medicine name
     mov ah,9
     int 21h
         
-    add arinac_sold,48
+    add arinac_sold,48              ;convert data into numerical digit
         
-    mov dl,arinac_sold
+    mov dl,arinac_sold              ;display count how much a specific medicine sold
     mov ah,2
     int 21h
         
-    mov dx,offset pfizer_print
+    mov dx,offset pfizer_print      ;display line of medicine name
     mov ah,9
     int 21h
         
-    add pfizer_sold,48
+    add pfizer_sold,48              ;convert data into numerical digit
         
-    mov dl,pfizer_sold
+    mov dl,pfizer_sold              ;display count how much a specific medicine sold
     mov ah,2
     int 21h
         
-    mov dx,offset sinopharm_print
+    mov dx,offset sinopharm_print   ;display line of medicine name
     mov ah,9
     int 21h
         
-    add sinopharm_sold,48
+    add sinopharm_sold,48           ;convert data into numerical digit  
         
-    mov dl,sinopharm_sold
+    mov dl,sinopharm_sold           ;display count how much a specific medicine sold
     mov ah,2
-    int 21h
-    
-    mov ah, 09h
-    mov dx, offset newLine
     int 21h
     
     mov ah, 09h
-    mov dx, offset key_message
+    mov dx, offset newLine          ;line feed
+    int 21h
+    
+    mov ah, 09h
+    mov dx, offset key_message      ;display line 'Press any key to continuue'
     int 21h
     
     mov ah, 01h
     int 21h
     
     mov ah, 09h
-    mov dx, offset newLine
+    mov dx, offset newLine          ;line feed
     int 21h
     
-    ; bx has offset menu
-    jmp bx
+    
+    jmp bx                          ; bx has offset menu
 
-    ret
+    ret                             ;return
         
-medicines_stats endp
+medicines_stats endp                ;function end
 
-end main
+end main                            ;program end
